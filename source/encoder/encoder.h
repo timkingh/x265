@@ -155,7 +155,6 @@ public:
 
     uint32_t           m_residualSumEmergency[MAX_NUM_TR_CATEGORIES][MAX_NUM_TR_COEFFS];
     uint32_t           m_countEmergency[MAX_NUM_TR_CATEGORIES];
-    uint16_t           (*m_offsetEmergency)[MAX_NUM_TR_CATEGORIES][MAX_NUM_TR_COEFFS];
 
     int64_t            m_firstPts;
     int64_t            m_bframeDelayTime;
@@ -211,13 +210,13 @@ public:
 
     int               m_saveCtuDistortionLevel;
 
-    /* Begin intra refresh when one not in progress or else begin one as soon as the current 
+    /* Begin intra refresh when one not in progress or else begin one as soon as the current
      * one is done. Requires bIntraRefresh to be set.*/
     int                m_bQueuedIntraRefresh;
 
     /* For optimising slice QP */
     Lock               m_sliceQpLock;
-    int                m_iFrameNum;   
+    int                m_iFrameNum;
     int                m_iPPSQpMinus26;
     int64_t            m_iBitsCostSum[QP_MAX_MAX + 1];
     Lock               m_sliceRefIdxLock;
@@ -252,6 +251,7 @@ public:
     Lock                    m_dynamicRefineLock;
 
     bool                    m_saveCTUSize;
+    uint16_t           (*m_offsetEmergency)[MAX_NUM_TR_CATEGORIES][MAX_NUM_TR_COEFFS];
 
     Encoder();
     ~Encoder()
