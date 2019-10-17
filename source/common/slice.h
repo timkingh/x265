@@ -334,7 +334,6 @@ public:
     PicYuv*     m_refReconPicList[2][MAX_NUM_REF + 1];
 
     WeightParam m_weightPredTable[2][MAX_NUM_REF][3]; // [list][refIdx][0:Y, 1:U, 2:V]
-    MotionReference (*m_mref)[MAX_NUM_REF + 1];
     RPS         m_rps;
 
     NalUnitType m_nalUnitType;
@@ -405,6 +404,7 @@ public:
     bool isInterP() const { return m_sliceType == P_SLICE; }
 
     uint32_t realEndAddress(uint32_t endCUAddr) const;
+    MotionReference (*m_mref)[MAX_NUM_REF + 1];
 };
 
 }
