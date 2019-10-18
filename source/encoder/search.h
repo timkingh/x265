@@ -74,7 +74,7 @@ struct RQTData
     coeff_t* coeffRQT[3];  /* coeff storage for entire CTU for each RQT layer */
     Yuv      reconQtYuv;   /* recon storage for entire CTU for each RQT layer (intra) */
     ShortYuv resiQtYuv;    /* residual storage for entire CTU for each RQT layer (inter) */
-    
+
     /* per-depth temp buffers for inter prediction */
     ShortYuv tmpResiYuv;
     Yuv      tmpPredYuv;
@@ -240,7 +240,7 @@ struct CUStats
 
         other.clear();
     }
-}; 
+};
 #endif
 
 inline int getTUBits(int idx, int numIdx)
@@ -285,6 +285,8 @@ public:
 
     int32_t         m_sliceMaxY;
     int32_t         m_sliceMinY;
+
+    FILE*           m_fpImeMv;
 
 #if DETAILED_CU_STATS
     /* Accumulate CU statistics separately for each frame encoder */
@@ -435,8 +437,10 @@ protected:
     uint32_t getIntraRemModeBits(CUData & cu, uint32_t absPartIdx, uint32_t mpmModes[3], uint64_t& mpms) const;
 
     void updateModeCost(Mode& m) const { m.rdCost = m_rdCost.m_psyRd ? m_rdCost.calcPsyRdCost(m.distortion, m.totalBits, m.psyEnergy)
-                                                : (m_rdCost.m_ssimRd ? m_rdCost.calcSsimRdCost(m.distortion, m.totalBits, m.ssimEnergy) 
+                                                : (m_rdCost.m_ssimRd ? m_rdCost.calcSsimRdCost(m.distortion, m.totalBits, m.ssimEnergy)
                                                 : m_rdCost.calcRdCost(m.distortion, m.totalBits)); }
+
+    void printImeMV(Mode& interMode, const CUGeom& cuGeom);
 };
 }
 

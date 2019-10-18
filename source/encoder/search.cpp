@@ -68,6 +68,12 @@ Search::Search()
     m_slice = NULL;
     m_frame = NULL;
     m_maxTUDepth = -1;
+
+    m_fpImeMv = fopen("F:\\rkvenc_verify\\debug\\6\\x265_origin_ime_mv.txt", "w");
+    if (m_fpImeMv == NULL)
+    {
+        x265_log(NULL, X265_LOG_ERROR, "fopen IME MV file");
+    }
 }
 
 bool Search::initSearch(const x265_param& param, ScalingList& scalingList)
@@ -200,6 +206,9 @@ Search::~Search()
     X265_FREE(m_tsCoeff);
     X265_FREE(m_tsResidual);
     X265_FREE(m_tsRecon);
+
+    if (m_fpImeMv)
+        fclose(m_fpImeMv);
 }
 
 int Search::setLambdaFromQP(const CUData& ctu, int qp, int lambdaQp)
@@ -2420,7 +2429,7 @@ void Search::predInterSearch(Mode& interMode, const CUGeom& cuGeom, bool bChroma
                     setSearchRange(cu, mvp, m_param->searchRange, mvmin, mvmax);
                     int satdCost = m_me.motionEstimate(&slice->m_mref[list][ref], mvmin, mvmax, mvp, numMvc, mvc, m_param->searchRange, outmv, m_param->maxSlices,
                       m_param->bSourceReferenceEstimation ? m_slice->m_refFrameList[list][ref]->m_fencPic->getLumaAddr(0) : 0);
-                    printf("RIME MV %d %d\n", m_me.imeMv.x, m_me.imeMv.y);
+                    printImeMV(interMode, cuGeom);
 
                     if (m_param->bEnableHME && mvp_lowres.notZero() && mvp_lowres != mvp)
                     {
@@ -4039,5 +4048,21 @@ void Search::checkDQPForSplitPred(Mode& mode, const CUGeom& cuGeom)
         else
             /* No residual within this CU or subCU, so reset QP to RefQP */
             cu.setQPSubParts(cu.getRefQP(0), 0, cuGeom.depth);
+    }
+}
+
+void Search::printImeMV(Mode& interMode, const CUGeom& cuGeom)
+{
+    CUData& cu = interMode.cu;
+
+    if (m_fpImeMv)
+    {
+        if (cuGeom.depth == 2)
+        {
+            uint32_t cu16_x = cu.m_cuPelX / 16;
+            uint32_t cu16_y = cu.m_cuPelY / 16;
+            fprintf(m_fpImeMv, "frame=1, cu_x=%d, cu_y=%d, cu_size=16, mv_x=%d, mv_y=%d\n",
+                cu16_x, cu16_y, m_me.imeMv.x, m_me.imeMv.y);
+        }
     }
 }
