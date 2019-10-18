@@ -615,18 +615,18 @@ void MotionEstimate::refineMV(ReferencePlanes* ref,
     intptr_t stride = ref->lumaStride;
     pixel* fenc = fencPUYuv.m_buf[0];
     pixel* fref = ref->fpelPlane[0] + blockOffset;
-    
+
     setMVP(qmvp);
-    
+
     MV qmvmin = mvmin.toQPel();
     MV qmvmax = mvmax.toQPel();
-   
+
     /* The term cost used here means satd/sad values for that particular search.
      * The costs used in ME integer search only includes the SAD cost of motion
      * residual and sqrtLambda times MVD bits.  The subpel refine steps use SATD
      * cost of residual and sqrtLambda * MVD bits.
     */
-             
+
     // measure SATD cost at clipped QPEL MVP
     MV pmv = qmvp.clipped(qmvmin, qmvmax);
     MV bestpre = pmv;
@@ -688,7 +688,7 @@ void MotionEstimate::refineMV(ReferencePlanes* ref,
         int bdir = 0;
         for (int i = 1; i <= wl.hpel_dirs; i++)
         {
-            MV qmv = bmv + square1[i] * 2;            
+            MV qmv = bmv + square1[i] * 2;
 
             // check mv range for slice bound
             if ((qmv.y < qmvmin.y) | (qmv.y > qmvmax.y))
@@ -699,7 +699,7 @@ void MotionEstimate::refineMV(ReferencePlanes* ref,
         }
 
         if (bdir)
-            bmv += square1[bdir] * 2;            
+            bmv += square1[bdir] * 2;
         else
             break;
     }
@@ -714,7 +714,7 @@ void MotionEstimate::refineMV(ReferencePlanes* ref,
         for (int i = 1; i <= wl.qpel_dirs; i++)
         {
             MV qmv = bmv + square1[i];
-            
+
             // check mv range for slice bound
             if ((qmv.y < qmvmin.y) | (qmv.y > qmvmax.y))
                 continue;
@@ -731,7 +731,7 @@ void MotionEstimate::refineMV(ReferencePlanes* ref,
 
     // check mv range for slice bound
     X265_CHECK(((pmv.y >= qmvmin.y) & (pmv.y <= qmvmax.y)), "mv beyond range!");
-    
+
     x265_emms();
     outQMv = bmv;
 }
@@ -1453,6 +1453,8 @@ me_hex2:
     else
         bmv = bmv.toQPel(); // promote search bmv to qpel
 
+    imeMv = bmv.roundToFPel();
+
     const SubpelWorkload& wl = workload[this->subpelRefine];
 
     // check mv range for slice bound
@@ -1579,7 +1581,7 @@ int MotionEstimate::subpelCompare(ReferencePlanes *ref, const MV& qmv, pixelcmp_
     X265_CHECK(fencPUYuv.m_size == FENC_STRIDE, "fenc buffer is assumed to have FENC_STRIDE by sad_x3 and sad_x4\n");
 
     ALIGN_VAR_32(pixel, subpelbuf[MAX_CU_SIZE * MAX_CU_SIZE]);
-    
+
     if (!(yFrac | xFrac))
         cost = cmp(fencPUYuv.m_buf[0], fencStride, fref, refStride);
     else

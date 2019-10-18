@@ -120,7 +120,7 @@ bool FrameEncoder::init(Encoder *top, int numRows, int numCols)
     m_sliceBaseRow = X265_MALLOC(uint32_t, m_param->maxSlices + 1);
     ok &= !!m_sliceBaseRow;
     m_sliceGroupSize = (uint16_t)(m_numRows + m_param->maxSlices - 1) / m_param->maxSlices;
-    uint32_t sliceGroupSizeAccu = (m_numRows << 8) / m_param->maxSlices;    
+    uint32_t sliceGroupSizeAccu = (m_numRows << 8) / m_param->maxSlices;
     uint32_t rowSum = sliceGroupSizeAccu;
     uint32_t sidx = 0;
     for (uint32_t i = 0; i < m_numRows; i++)
@@ -130,7 +130,7 @@ bool FrameEncoder::init(Encoder *top, int numRows, int numCols)
         {
             rowSum += sliceGroupSizeAccu;
             m_sliceBaseRow[++sidx] = i;
-        }        
+        }
     }
     X265_CHECK(sidx < m_param->maxSlices, "sliceID check failed!");
     m_sliceBaseRow[0] = 0;
@@ -503,7 +503,7 @@ void FrameEncoder::compressFrame()
 #endif
         if (m_param->analysisLoad)
         {
-            for (int list = 0; list < slice->isInterB() + 1; list++) 
+            for (int list = 0; list < slice->isInterB() + 1; list++)
             {
                 for (int plane = 0; plane < (m_param->internalCsp != X265_CSP_I400 ? 3 : 1); plane++)
                 {
@@ -619,9 +619,9 @@ void FrameEncoder::compressFrame()
 
     /* reset entropy coders and compute slice id */
     m_entropyCoder.load(m_initSliceContext);
-    for (uint32_t sliceId = 0; sliceId < m_param->maxSlices; sliceId++)   
+    for (uint32_t sliceId = 0; sliceId < m_param->maxSlices; sliceId++)
         for (uint32_t row = m_sliceBaseRow[sliceId]; row < m_sliceBaseRow[sliceId + 1]; row++)
-            m_rows[row].init(m_initSliceContext, sliceId);   
+            m_rows[row].init(m_initSliceContext, sliceId);
 
     // reset slice counter for rate control update
     m_sliceCnt = 0;
@@ -697,14 +697,14 @@ void FrameEncoder::compressFrame()
             if (m_param->interlaceMode > 0)
             {
                 if( m_param->interlaceMode == 2 )
-                {   
+                {
                     // m_picStruct should be set to 3 or 4 when field feature is enabled
                     if (m_param->bField)
                         // 3: Top field, bottom field, in that order; 4: Bottom field, top field, in that order
                         sei->m_picStruct = (slice->m_fieldNum == 1) ? 4 : 3;
                     else
                         sei->m_picStruct = (poc & 1) ? 1 /* top */ : 2 /* bottom */;
-                }     
+                }
                 else if (m_param->interlaceMode == 1)
                 {
                     if (m_param->bField)
@@ -776,7 +776,7 @@ void FrameEncoder::compressFrame()
         m_bs.writeByteAlignment();
         m_nalList.serialize(NAL_UNIT_PREFIX_SEI, m_bs);
     }
-    /* CQP and CRF (without capped VBV) doesn't use mid-frame statistics to 
+    /* CQP and CRF (without capped VBV) doesn't use mid-frame statistics to
      * tune RateControl parameters for other frames.
      * Hence, for these modes, update m_startEndOrder and unlock RC for previous threads waiting in
      * RateControlEnd here, after the slice contexts are initialized. For the rest - ABR
@@ -796,9 +796,9 @@ void FrameEncoder::compressFrame()
      * compressed in a wave-front pattern if WPP is enabled. Row based loop
      * filters runs behind the CTU compression and reconstruction */
 
-    for (uint32_t sliceId = 0; sliceId < m_param->maxSlices; sliceId++)    
+    for (uint32_t sliceId = 0; sliceId < m_param->maxSlices; sliceId++)
         m_rows[m_sliceBaseRow[sliceId]].active = true;
-    
+
     if (m_param->bEnableWavefront)
     {
         int i = 0;
@@ -912,7 +912,7 @@ void FrameEncoder::compressFrame()
         PicYuv *reconPic = m_frame->m_reconPic;
         uint32_t height = reconPic->m_picHeight;
         initDecodedPictureHashSEI(0, 0, height);
-    } 
+    }
 
     if (m_param->bDynamicRefine && m_top->m_startPoint <= m_frame->m_encodeOrder) //Avoid collecting data that will not be used by future frames.
         collectDynDataFrame();
@@ -1022,7 +1022,7 @@ void FrameEncoder::compressFrame()
             m_entropyCoder.setBitstream(&m_bs);
             if (slice->m_pps->bEntropyCodingSyncEnabled)
                 m_entropyCoder.codeSliceHeaderWPPEntryPoints(&m_substreamSizes[prevSliceRow], (nextSliceRow - prevSliceRow - 1), maxStreamSize);
-            
+
             m_bs.writeByteAlignment();
 
             m_nalList.serialize(slice->m_nalUnitType, m_bs);
@@ -1147,13 +1147,13 @@ void FrameEncoder::compressFrame()
         m_cuStats.accumulate(m_tld[i].analysis.m_stats[m_jpId], *m_param);
 #endif
 
-    m_endFrameTime = x265_mdate();  
+    m_endFrameTime = x265_mdate();
 }
 
 void FrameEncoder::initDecodedPictureHashSEI(int row, int cuAddr, int height)
 {
     PicYuv *reconPic = m_frame->m_reconPic;
-    uint32_t width = reconPic->m_picWidth;	
+    uint32_t width = reconPic->m_picWidth;
     intptr_t stride = reconPic->m_stride;
     uint32_t maxCUHeight = m_param->maxCUSize;
 
@@ -1367,8 +1367,8 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
     const uint32_t rowInSlice = row - m_sliceBaseRow[sliceId];
 
     // Load SBAC coder context from previous row and initialize row state.
-    if (bFirstRowInSlice && !curRow.completed)        
-        rowCoder.load(m_initSliceContext);     
+    if (bFirstRowInSlice && !curRow.completed)
+        rowCoder.load(m_initSliceContext);
 
     // calculate mean QP for consistent deltaQP signalling calculation
     if (m_param->bOptCUDeltaQP)
@@ -1455,7 +1455,7 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
                 curRow.bufferedEntropy.copyState(rowCoder);
                 curRow.bufferedEntropy.loadContexts(rowCoder);
             }
-            if (bFirstRowInSlice && m_vbvResetTriggerRow != intRow)            
+            if (bFirstRowInSlice && m_vbvResetTriggerRow != intRow)
             {
                 curEncData.m_rowStat[row].rowQp = curEncData.m_avgQpRc;
                 curEncData.m_rowStat[row].rowQpScale = x265_qp2qScale(curEncData.m_avgQpRc);
@@ -1534,7 +1534,7 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
             {
                 // Delay one row to avoid intra prediction conflict
                 if (m_pool && !bFirstRowInSlice)
-                {                    
+                {
                     int allowCol = col;
 
                     // avoid race condition on last column
@@ -1616,9 +1616,9 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
         x265_emms();
 
         if (bIsVbv)
-        {   
+        {
             // Update encoded bits, satdCost, baseQP for each CU if tune grain is disabled
-            FrameData::RCStatCU& cuStat = curEncData.m_cuStat[cuAddr];    
+            FrameData::RCStatCU& cuStat = curEncData.m_cuStat[cuAddr];
             if ((m_param->bEnableWavefront && ((cuAddr == m_sliceBaseRow[sliceId] * numCols) || !m_param->rc.bEnableConstVbv)) || !m_param->bEnableWavefront)
             {
                 curEncData.m_rowStat[row].rowSatd += cuStat.vbvCost;
@@ -1627,7 +1627,7 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
                 curEncData.m_rowStat[row].sumQpRc += cuStat.baseQp;
                 curEncData.m_rowStat[row].numEncodedCUs = cuAddr;
             }
-            
+
             // If current block is at row end checkpoint, call vbv ratecontrol.
             if (!m_param->bEnableWavefront && col == numCols - 1)
             {
@@ -1778,7 +1778,7 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
     /* this row of CTUs has been compressed */
     if (m_param->bEnableWavefront && m_param->rc.bEnableConstVbv)
     {
-        if (bLastRowInSlice)       
+        if (bLastRowInSlice)
         {
             for (uint32_t r = m_sliceBaseRow[sliceId]; r < m_sliceBaseRow[sliceId + 1]; r++)
             {
@@ -1806,7 +1806,7 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
         uint32_t maxRows = m_sliceBaseRow[sliceId + 1] - m_sliceBaseRow[sliceId];
 
         if (!m_rce.encodeOrder)
-            rowCount = maxRows - 1; 
+            rowCount = maxRows - 1;
         else if ((uint32_t)m_rce.encodeOrder <= 2 * (m_param->fpsNum / m_param->fpsDenom))
             rowCount = X265_MIN((maxRows + 1) / 2, maxRows - 1);
         else
@@ -1824,7 +1824,7 @@ void FrameEncoder::processRowEncoder(int intRow, ThreadLocalData& tld)
             {
                 uint32_t startAddr = m_sliceBaseRow[sliceId] * numCols;
                 uint32_t finishAddr = startAddr + rowCount * numCols;
-                
+
                 for (uint32_t cuAddr = startAddr; cuAddr < finishAddr; cuAddr++)
                     m_rowSliceTotalBits[sliceId] += curEncData.m_cuStat[cuAddr].totalBits;
             }

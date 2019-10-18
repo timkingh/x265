@@ -39,7 +39,7 @@ class MotionEstimate : public BitCost
 protected:
 
     intptr_t blockOffset;
-    
+
     int ctuAddr;
     int absPartIdx;  // part index of PU, including CU offset within CTU
 
@@ -68,6 +68,7 @@ public:
     Yuv fencPUYuv;
     int partEnum;
     bool bChromaSATD;
+    MV imeMv;
 
     MotionEstimate();
     ~MotionEstimate();

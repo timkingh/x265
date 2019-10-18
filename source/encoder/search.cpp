@@ -1377,7 +1377,7 @@ void Search::checkIntraInInter(Mode& intraMode, const CUGeom& cuGeom)
     if (primitives.cu[sizeIdx].intra_pred_allangs)
     {
         primitives.cu[sizeIdx].transpose(m_fencTransposed, fenc, scaleStride);
-        primitives.cu[sizeIdx].intra_pred_allangs(m_intraPredAngs, intraNeighbourBuf[0], intraNeighbourBuf[1], (scaleTuSize <= 16)); 
+        primitives.cu[sizeIdx].intra_pred_allangs(m_intraPredAngs, intraNeighbourBuf[0], intraNeighbourBuf[1], (scaleTuSize <= 16));
     }
     else
         allangs = false;
@@ -1623,7 +1623,7 @@ sse_t Search::estIntraPredQT(Mode &intraMode, const CUGeom& cuGeom, const uint32
 
                 uint64_t paddedBcost = bcost + (bcost >> 2); // 1.25%
                 for (int mode = 0; mode < 35; mode++)
-                    if ((modeCosts[mode] < paddedBcost) || ((uint32_t)mode == mpmModes[0])) 
+                    if ((modeCosts[mode] < paddedBcost) || ((uint32_t)mode == mpmModes[0]))
                         /* choose for R-D analysis only if this mode passes cost threshold or matches MPM[0] */
                         updateCandList(mode, modeCosts[mode], maxCandCount, rdModeList, candCostList);
             }
@@ -2110,7 +2110,7 @@ void Search::singleMotionEstimation(Search& master, Mode& interMode, const Predi
 
     setSearchRange(interMode.cu, mvp, m_param->searchRange, mvmin, mvmax);
 
-    int satdCost = m_me.motionEstimate(&m_slice->m_mref[list][ref], mvmin, mvmax, mvp, numMvc, mvc, m_param->searchRange, outmv, m_param->maxSlices, 
+    int satdCost = m_me.motionEstimate(&m_slice->m_mref[list][ref], mvmin, mvmax, mvp, numMvc, mvc, m_param->searchRange, outmv, m_param->maxSlices,
       m_param->bSourceReferenceEstimation ? m_slice->m_refFrameList[list][ref]->m_fencPic->getLumaAddr(0) : 0);
 
     if (m_param->bEnableHME && mvp_lowres.notZero() && mvp_lowres != mvp)
@@ -2307,7 +2307,7 @@ void Search::predInterSearch(Mode& interMode, const CUGeom& cuGeom, bool bChroma
                     mvp = checkBestMVP(amvp, outmv, mvpIdx, bits, cost);
                 else
                 {
-                    /* It is more accurate to compare with actual mvp that was used in motionestimate than amvp[mvpIdx]. Here 
+                    /* It is more accurate to compare with actual mvp that was used in motionestimate than amvp[mvpIdx]. Here
                       the actual mvp is bestME from pass 1 for that mvpIdx */
                     int diffBits = m_me.bitcost(outmv, amvp[!mvpIdx]) - m_me.bitcost(outmv, mvpIn);
                     if (diffBits < 0)
@@ -2331,7 +2331,7 @@ void Search::predInterSearch(Mode& interMode, const CUGeom& cuGeom, bool bChroma
                     bestME[list].ref = ref;
                 }
                 bDoUnidir = false;
-            }            
+            }
         }
         else if (m_param->bDistributeMotionEstimation)
         {
@@ -2418,8 +2418,9 @@ void Search::predInterSearch(Mode& interMode, const CUGeom& cuGeom, bool bChroma
                             m_me.integral[planes] = interMode.fencYuv->m_integral[list][ref][planes] + puX * pu.width + puY * pu.height * m_slice->m_refFrameList[list][ref]->m_reconPic->m_stride;
                     }
                     setSearchRange(cu, mvp, m_param->searchRange, mvmin, mvmax);
-                    int satdCost = m_me.motionEstimate(&slice->m_mref[list][ref], mvmin, mvmax, mvp, numMvc, mvc, m_param->searchRange, outmv, m_param->maxSlices, 
+                    int satdCost = m_me.motionEstimate(&slice->m_mref[list][ref], mvmin, mvmax, mvp, numMvc, mvc, m_param->searchRange, outmv, m_param->maxSlices,
                       m_param->bSourceReferenceEstimation ? m_slice->m_refFrameList[list][ref]->m_fencPic->getLumaAddr(0) : 0);
+                    printf("RIME MV %d %d\n", m_me.imeMv.x, m_me.imeMv.y);
 
                     if (m_param->bEnableHME && mvp_lowres.notZero() && mvp_lowres != mvp)
                     {
@@ -3163,7 +3164,7 @@ bool Search::splitTU(Mode& mode, const CUGeom& cuGeom, uint32_t absPartIdx, uint
         splitCost.rdcost = m_rdCost.calcSsimRdCost(splitCost.distortion, splitCost.bits, splitCost.energy);
     else
         splitCost.rdcost = m_rdCost.calcRdCost(splitCost.distortion, splitCost.bits);
-        
+
     return ycbf || ucbf || vcbf;
 }
 
@@ -3280,7 +3281,7 @@ void Search::estimateResidualQT(Mode& mode, const CUGeom& cuGeom, uint32_t absPa
 
         X265_CHECK(log2TrSize <= 5, "log2TrSize is too large\n");
 
-        //Assuming zero residual 
+        //Assuming zero residual
         sse_t zeroDistY = primitives.cu[partSize].sse_pp(fenc, fencYuv->m_size, mode.predYuv.getLumaAddr(absPartIdx), mode.predYuv.m_size);
         uint32_t zeroEnergyY = 0;
         if (m_rdCost.m_psyRd)
@@ -3403,7 +3404,7 @@ void Search::estimateResidualQT(Mode& mode, const CUGeom& cuGeom, uint32_t absPa
                     int16_t* curResiC = m_rqt[qtLayer].resiQtYuv.getChromaAddr(chromaId, absPartIdxC);
                     zeroDistC = m_rdCost.scaleChromaDist(chromaId, primitives.cu[log2TrSizeC - 2].sse_pp(fenc, fencYuv->m_csize, mode.predYuv.getChromaAddr(chromaId, absPartIdxC), mode.predYuv.m_csize));
 
-                    // Assuming zero residual 
+                    // Assuming zero residual
                     if (m_rdCost.m_psyRd)
                         zeroEnergyC = m_rdCost.psyCost(partSizeC, fenc, fencYuv->m_csize, mode.predYuv.getChromaAddr(chromaId, absPartIdxC), mode.predYuv.m_csize);
                     else if(m_rdCost.m_ssimRd)

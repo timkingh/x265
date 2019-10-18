@@ -201,7 +201,7 @@ Mode& Analysis::compressCTU(CUData& ctu, Frame& frame, const CUGeom& cuGeom, con
         m_reuseModes = &m_reuseInterDataCTU->modes[ctu.m_cuAddr * ctu.m_numPartitions];
         m_reuseDepth = &m_reuseInterDataCTU->depth[ctu.m_cuAddr * ctu.m_numPartitions];
     }
-    
+
     if ((m_param->analysisSave || m_param->analysisLoad) && m_slice->m_sliceType != I_SLICE && m_param->analysisReuseLevel > 1 && m_param->analysisReuseLevel < 10)
     {
         int numPredDir = m_slice->isInterP() ? 1 : 2;
@@ -522,7 +522,7 @@ uint64_t Analysis::compressIntraCU(const CUData& parentCTU, const CUGeom& cuGeom
     int split = 0;
     if (m_param->intraRefine && m_param->intraRefine != 4)
     {
-        split = m_param->scaleFactor && bDecidedDepth && (!mightNotSplit || 
+        split = m_param->scaleFactor && bDecidedDepth && (!mightNotSplit ||
             ((cuGeom.log2CUSize == (uint32_t)(g_log2Size[m_param->minCUSize] + 1))));
         if (cuGeom.log2CUSize == (uint32_t)(g_log2Size[m_param->minCUSize]) && !bDecidedDepth)
             bAlreadyDecided = false;
@@ -1299,6 +1299,7 @@ SplitData Analysis::compressInterCU_rd0_4(const CUData& parentCTU, const CUGeom&
                 }
             }
         }
+
         /* Step 1. Evaluate Merge/Skip candidates for likely early-outs, if skip mode was not set above */
         if ((mightNotSplit && depth >= minDepth && !md.bestMode && !bCtuInfoCheck) || (m_param->bAnalysisType == AVC_INFO && m_param->analysisReuseLevel == 7 && (m_modeFlag[0] || m_modeFlag[1]))) /* TODO: Re-evaluate if analysis load/save still works */
         {
@@ -1323,6 +1324,7 @@ SplitData Analysis::compressInterCU_rd0_4(const CUData& parentCTU, const CUGeom&
         }
         if (m_param->bAnalysisType == AVC_INFO && md.bestMode && cuGeom.numPartitions <= 16 && m_param->analysisReuseLevel == 7)
             skipRecursion = true;
+
         /* Step 2. Evaluate each of the 4 split sub-blocks in series */
         if (mightSplit && !skipRecursion)
         {
@@ -1377,6 +1379,7 @@ SplitData Analysis::compressInterCU_rd0_4(const CUData& parentCTU, const CUGeom&
             else
                 splitPred->sa8dCost = m_rdCost.calcRdSADCost((uint32_t)splitPred->distortion, splitPred->sa8dBits);
         }
+
         /* If analysis mode is simple do not Evaluate other modes */
         if (m_param->bAnalysisType == AVC_INFO && m_param->analysisReuseLevel == 7)
         {
@@ -1395,6 +1398,7 @@ SplitData Analysis::compressInterCU_rd0_4(const CUData& parentCTU, const CUGeom&
          *   0  1
          *   2  3 */
         uint32_t allSplitRefs = splitData[0].splitRefs | splitData[1].splitRefs | splitData[2].splitRefs | splitData[3].splitRefs;
+
         /* Step 3. Evaluate ME (2Nx2N, rect, amp) and intra modes at current depth */
         if (mightNotSplit && (depth >= minDepth || (m_param->bCTUInfo && !md.bestMode)))
         {
@@ -1580,6 +1584,7 @@ SplitData Analysis::compressInterCU_rd0_4(const CUData& parentCTU, const CUGeom&
                         }
                     }
                 }
+
                 bool bTryIntra = (m_slice->m_sliceType != B_SLICE || m_param->bIntraInBFrames) && cuGeom.log2CUSize != MAX_LOG2_CU_SIZE && !((m_param->bCTUInfo & 4) && bCtuInfoCheck);
                 if (m_param->rdLevel >= 3)
                 {
@@ -3294,7 +3299,7 @@ void Analysis::encodeResidue(const CUData& ctu, const CUGeom& cuGeom)
     if (cu.isIntra(0))
     {
         ProfileCUScope(ctu, intraRDOElapsedTime[cuGeom.depth], countIntraRDO[cuGeom.depth]); // not really RDO, but close enough
-        
+
         uint32_t tuDepthRange[2];
         cu.getIntraTUQtDepthRange(tuDepthRange, 0);
 
@@ -3555,7 +3560,7 @@ uint32_t Analysis::calculateCUVariance(const CUData& ctu, const CUGeom& cuGeom)
     uint32_t block_y = ctu.m_cuPelY + g_zscanToPelY[cuGeom.absPartIdx];
     uint32_t maxCols = (m_frame->m_fencPic->m_picWidth + (loopIncr - 1)) / loopIncr;
     uint32_t blockSize = m_param->maxCUSize >> cuGeom.depth;
-    uint32_t cnt = 0; 
+    uint32_t cnt = 0;
 
     for (uint32_t block_yy = block_y; block_yy < block_y + blockSize && block_yy < height; block_yy += loopIncr)
     {
@@ -3566,7 +3571,7 @@ uint32_t Analysis::calculateCUVariance(const CUData& ctu, const CUGeom& cuGeom)
             cnt++;
         }
     }
-    
+
     return cuVariance / cnt;
 }
 
