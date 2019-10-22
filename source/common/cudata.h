@@ -79,7 +79,7 @@ struct CUGeom
         LEAF            = 1<<3, // CU is a leaf node of the CTU
         SPLIT           = 1<<4, // CU is currently split in four child CUs.
     };
-    
+
     // (1 + 4 + 16 + 64) = 85.
     enum { MAX_GEOMS = 85 };
 
@@ -110,9 +110,9 @@ struct InterNeighbourMV
     // For spatial prediction, this field contains the reference index
     // in each list (-1 if not available).
     //
-    // For temporal prediction, the first value is used for the 
-    // prediction with list 0. The second value is used for the prediction 
-    // with list 1. For each value, the first four bits are the reference index 
+    // For temporal prediction, the first value is used for the
+    // prediction with list 0. The second value is used for the prediction
+    // with list 1. For each value, the first four bits are the reference index
     // associated to the PMV, and the fifth bit is the list associated to the PMV.
     // if both reference indices are -1, then unifiedRef is also -1
     union { int16_t refIdx[2]; int32_t unifiedRef; };
@@ -126,8 +126,8 @@ const uint32_t nbPartsTable[8] = { 1, 2, 2, 4, 2, 2, 2, 2 };
 
 // Partition table.
 // First index is partitioning mode. Second index is partition index.
-// Third index is 0 for partition sizes, 1 for partition offsets. The 
-// sizes and offsets are encoded as two packed 4-bit values (X,Y). 
+// Third index is 0 for partition sizes, 1 for partition offsets. The
+// sizes and offsets are encoded as two packed 4-bit values (X,Y).
 // X and Y represent 1/4 fractions of the block size.
 const uint32_t partTable[8][4][2] =
 {
@@ -174,6 +174,7 @@ public:
     cucopy_t      m_subPartCopy;      // pointer to function that copies m_numPartitions/4 elements, may be NULL
     cubcast_t     m_subPartSet;       // pointer to function that sets m_numPartitions/4 elements, may be NULL
 
+    uint32_t      m_frameCount;       // input yuv frame order
     uint32_t      m_cuAddr;           // address of CTU within the picture in raster order
     uint32_t      m_absIdxInCTU;      // address of CU within its CTU in Z scan order
     uint32_t      m_cuPelX;           // CU position within the picture, in pixels (X)
@@ -276,7 +277,7 @@ public:
     void     getNeighbourMV(uint32_t puIdx, uint32_t absPartIdx, InterNeighbourMV* neighbours) const;
     void     getIntraTUQtDepthRange(uint32_t tuDepthRange[2], uint32_t absPartIdx) const;
     void     getInterTUQtDepthRange(uint32_t tuDepthRange[2], uint32_t absPartIdx) const;
-    uint32_t getBestRefIdx(uint32_t subPartIdx) const { return ((m_interDir[subPartIdx] & 1) << m_refIdx[0][subPartIdx]) | 
+    uint32_t getBestRefIdx(uint32_t subPartIdx) const { return ((m_interDir[subPartIdx] & 1) << m_refIdx[0][subPartIdx]) |
                                                               (((m_interDir[subPartIdx] >> 1) & 1) << (m_refIdx[1][subPartIdx] + 16)); }
     uint32_t getPUOffset(uint32_t puIdx, uint32_t absPartIdx) const { return (partAddrTable[(int)m_partSize[absPartIdx]][puIdx] << (m_slice->m_param->unitSizeDepth - m_cuDepth[absPartIdx]) * 2) >> 4; }
 
@@ -358,7 +359,7 @@ struct CUDataMemPool
     uint32_t* dynRefCntBlock;
     uint32_t* dynRefVarBlock;
 
-    CUDataMemPool() { charMemBlock = NULL; trCoeffMemBlock = NULL; mvMemBlock = NULL; distortionMemBlock = NULL; 
+    CUDataMemPool() { charMemBlock = NULL; trCoeffMemBlock = NULL; mvMemBlock = NULL; distortionMemBlock = NULL;
                       dynRefineRdBlock = NULL; dynRefCntBlock = NULL; dynRefVarBlock = NULL;}
 
     bool create(uint32_t depth, uint32_t csp, uint32_t numInstances, const x265_param& param)
@@ -371,7 +372,7 @@ struct CUDataMemPool
             CHECKED_MALLOC(trCoeffMemBlock, coeff_t, (sizeL) * numInstances);
         }
         else
-        {            
+        {
             uint32_t sizeC = sizeL >> (CHROMA_H_SHIFT(csp) + CHROMA_V_SHIFT(csp));
             CHECKED_MALLOC(trCoeffMemBlock, coeff_t, (sizeL + sizeC * 2) * numInstances);
         }

@@ -42,7 +42,7 @@ static void bcast4(uint8_t* dst, uint8_t val)  { ((uint32_t*)dst)[0] = 0x0101010
 static void copy16(uint8_t* dst, uint8_t* src) { ((uint64_t*)dst)[0] = ((uint64_t*)src)[0]; ((uint64_t*)dst)[1] = ((uint64_t*)src)[1]; }
 static void bcast16(uint8_t* dst, uint8_t val) { uint64_t bval = 0x0101010101010101ULL * val; ((uint64_t*)dst)[0] = bval; ((uint64_t*)dst)[1] = bval; }
 
-static void copy64(uint8_t* dst, uint8_t* src) { ((uint64_t*)dst)[0] = ((uint64_t*)src)[0]; ((uint64_t*)dst)[1] = ((uint64_t*)src)[1]; 
+static void copy64(uint8_t* dst, uint8_t* src) { ((uint64_t*)dst)[0] = ((uint64_t*)src)[0]; ((uint64_t*)dst)[1] = ((uint64_t*)src)[1];
                                                  ((uint64_t*)dst)[2] = ((uint64_t*)src)[2]; ((uint64_t*)dst)[3] = ((uint64_t*)src)[3];
                                                  ((uint64_t*)dst)[4] = ((uint64_t*)src)[4]; ((uint64_t*)dst)[5] = ((uint64_t*)src)[5];
                                                  ((uint64_t*)dst)[6] = ((uint64_t*)src)[6]; ((uint64_t*)dst)[7] = ((uint64_t*)src)[7]; }
@@ -282,6 +282,7 @@ void CUData::initCTU(const Frame& frame, uint32_t cuAddr, int qp, uint32_t first
 {
     m_encData       = frame.m_encData;
     m_slice         = m_encData->m_slice;
+    m_frameCount    = frame.m_frameCount;
     m_cuAddr        = cuAddr;
     m_cuPelX        = (cuAddr % m_slice->m_sps->numCuInWidth) << m_slice->m_param->maxLog2CUSize;
     m_cuPelY        = (cuAddr / m_slice->m_sps->numCuInWidth) << m_slice->m_param->maxLog2CUSize;
@@ -328,6 +329,7 @@ void CUData::initSubCU(const CUData& ctu, const CUGeom& cuGeom, int qp)
     m_absIdxInCTU   = cuGeom.absPartIdx;
     m_encData       = ctu.m_encData;
     m_slice         = ctu.m_slice;
+    m_frameCount    = ctu.m_frameCount;
     m_cuAddr        = ctu.m_cuAddr;
     m_cuPelX        = ctu.m_cuPelX + g_zscanToPelX[cuGeom.absPartIdx];
     m_cuPelY        = ctu.m_cuPelY + g_zscanToPelY[cuGeom.absPartIdx];
@@ -562,7 +564,7 @@ void CUData::copyFromPic(const CUData& ctu, const CUGeom& cuGeom, int csp, bool 
     m_partSet(m_cbf[0], 0);
 
     if (csp != X265_CSP_I400)
-    {        
+    {
         m_partSet(m_transformSkip[1], 0);
         m_partSet(m_transformSkip[2], 0);
         m_partSet(m_cbf[1], 0);
@@ -1488,7 +1490,7 @@ uint32_t CUData::getInterMergeCandidates(uint32_t absPartIdx, uint32_t puIdx, MV
 
     uint32_t partIdxLT, partIdxRT, partIdxLB = deriveLeftBottomIdx(puIdx);
     PartSize curPS = (PartSize)m_partSize[absPartIdx];
-    
+
     // left
     uint32_t leftPartIdx = 0;
     const CUData* cuLeft = getPULeft(leftPartIdx, partIdxLB);
@@ -2123,7 +2125,7 @@ void CUData::calcCTUGeoms(uint32_t ctuWidth, uint32_t ctuHeight, uint32_t maxCUS
                 uint32_t py = sbY * blockSize;
                 int32_t presentFlag = px < ctuWidth && py < ctuHeight;
                 int32_t splitMandatoryFlag = presentFlag && !lastLevelFlag && (px + blockSize > ctuWidth || py + blockSize > ctuHeight);
-                
+
                 /* Offset of the luma CU in the X, Y direction in terms of pixels from the CTU origin */
                 uint32_t xOffset = (sbX * blockSize) >> 3;
                 uint32_t yOffset = (sbY * blockSize) >> 3;

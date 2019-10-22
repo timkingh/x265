@@ -277,7 +277,7 @@ void Encoder::create()
     initVPS(&m_vps);
     initSPS(&m_sps);
     initPPS(&m_pps);
-   
+
     if (m_param->rc.vbvBufferSize)
     {
         m_offsetEmergency = (uint16_t(*)[MAX_NUM_TR_CATEGORIES][MAX_NUM_TR_COEFFS])X265_MALLOC(uint16_t, MAX_NUM_TR_CATEGORIES * MAX_NUM_TR_COEFFS * (QP_MAX_MAX - QP_MAX_SPEC));
@@ -482,7 +482,7 @@ void Encoder::stopJobs()
 
     if (m_lookahead)
         m_lookahead->stopJobs();
-    
+
     for (int i = 0; i < m_param->frameNumThreads; i++)
     {
         if (m_frameEncoder[i])
@@ -1041,7 +1041,7 @@ int Encoder::encode(const x265_picture* pic_in, x265_picture* pic_out)
             if (inFrame->create(p, pic_in->quantOffsets))
             {
                 /* the first PicYuv created is asked to generate the CU and block unit offset
-                 * arrays which are then shared with all subsequent PicYuv (orig and recon) 
+                 * arrays which are then shared with all subsequent PicYuv (orig and recon)
                  * allocated by this top level encoder */
                 if (m_sps.cuOffsetY)
                 {
@@ -1100,11 +1100,12 @@ int Encoder::encode(const x265_picture* pic_in, x265_picture* pic_out)
         /* Copy input picture into a Frame and PicYuv, send to lookahead */
         inFrame->m_fencPic->copyFromPicture(*pic_in, *m_param, m_sps.conformanceWindow.rightOffset, m_sps.conformanceWindow.bottomOffset);
 
-        inFrame->m_poc       = ++m_pocLast;
-        inFrame->m_userData  = pic_in->userData;
-        inFrame->m_pts       = pic_in->pts;
-        inFrame->m_forceqp   = pic_in->forceqp;
-        inFrame->m_param     = (m_reconfigure || m_reconfigureRc) ? m_latestParam : m_param;
+        inFrame->m_poc        = ++m_pocLast;
+        inFrame->m_frameCount = pic_in->frameCount;
+        inFrame->m_userData   = pic_in->userData;
+        inFrame->m_pts        = pic_in->pts;
+        inFrame->m_forceqp    = pic_in->forceqp;
+        inFrame->m_param      = (m_reconfigure || m_reconfigureRc) ? m_latestParam : m_param;
         if (m_param->bField && m_param->interlaceMode)
             inFrame->m_fieldNum = pic_in->fieldNum;
 
@@ -1416,7 +1417,7 @@ int Encoder::encode(const x265_picture* pic_in, x265_picture* pic_out)
                 if (m_rateControl->writeRateControlFrameStats(outFrame, &curEncoder->m_rce))
                     m_aborted = true;
             if (pic_out)
-            { 
+            {
                 /* m_rcData is allocated for every frame */
                 pic_out->rcData = outFrame->m_rcData;
                 outFrame->m_rcData->qpaRc = outFrame->m_encData->m_avgQpRc;
@@ -1444,11 +1445,11 @@ int Encoder::encode(const x265_picture* pic_in, x265_picture* pic_out)
             }
             else
                 m_exportedPic = outFrame;
-            
+
             m_outputCount++;
             if (m_param->chunkEnd == m_outputCount)
                 m_numDelayedPic = 0;
-            else 
+            else
                 m_numDelayedPic--;
 
             ret = 1;
@@ -1948,9 +1949,9 @@ void Encoder::printSummary()
     }
     if (m_param->bMultiPassOptRPS && m_param->rc.bStatRead)
     {
-        x265_log(m_param, X265_LOG_INFO, "RPS in SPS: %d frames (%.2f%%), RPS not in SPS: %d frames (%.2f%%)\n", 
-            m_rpsInSpsCount, (float)100.0 * m_rpsInSpsCount / m_rateControl->m_numEntries, 
-            m_rateControl->m_numEntries - m_rpsInSpsCount, 
+        x265_log(m_param, X265_LOG_INFO, "RPS in SPS: %d frames (%.2f%%), RPS not in SPS: %d frames (%.2f%%)\n",
+            m_rpsInSpsCount, (float)100.0 * m_rpsInSpsCount / m_rateControl->m_numEntries,
+            m_rateControl->m_numEntries - m_rpsInSpsCount,
             (float)100.0 * (m_rateControl->m_numEntries - m_rpsInSpsCount) / m_rateControl->m_numEntries);
     }
 
@@ -2460,7 +2461,7 @@ void Encoder::getStreamHeaders(NALList& list, Entropy& sbacCoder, Bitstream& bs)
         bs.write(0x10, 8);
         list.serialize(NAL_UNIT_ACCESS_UNIT_DELIMITER, bs);
     }
-    
+
     /* headers for start of bitstream */
     bs.resetBits();
     sbacCoder.codeVPS(m_vps);
@@ -2745,7 +2746,7 @@ void Encoder::configure(x265_param *p)
     this->m_param = p;
     if (p->bAnalysisType == AVC_INFO)
         this->m_externalFlush = true;
-    else 
+    else
         this->m_externalFlush = false;
 
     if (p->bAnalysisType == AVC_INFO && (p->limitTU == 3 || p->limitTU == 4))
@@ -3783,7 +3784,7 @@ void Encoder::readAnalysisFile(x265_analysis_data* analysis, int curPoc, const x
     X265_FREAD(&analysis->satdCost, sizeof(int64_t), 1, m_analysisFileIn, &(picData->satdCost));
     X265_FREAD(&analysis->numCUsInFrame, sizeof(int), 1, m_analysisFileIn, &(picData->numCUsInFrame));
     X265_FREAD(&analysis->numPartitions, sizeof(int), 1, m_analysisFileIn, &(picData->numPartitions));
-    
+
     if (m_param->bDisableLookahead)
     {
         X265_FREAD(&analysis->numCuInHeight, sizeof(uint32_t), 1, m_analysisFileIn, &(picData->numCuInHeight));
@@ -4202,7 +4203,7 @@ int Encoder::validateAnalysisData(x265_analysis_data* analysis, int writeFlag)
         X265_FREAD(&readValue, sizeof(int), 1, m_analysisFileIn, &(saveParam->maxCUSize));
 
         bool isScaledRes = (2 * sourceHeight == curSourceHeight) && (2 * sourceWidth == curSourceWidth);
-        if (!isScaledRes && (sourceHeight != curSourceHeight || sourceWidth != curSourceWidth 
+        if (!isScaledRes && (sourceHeight != curSourceHeight || sourceWidth != curSourceWidth
                             || readValue != (int)m_param->maxCUSize || m_param->scaleFactor))
             error = true;
         else if (isScaledRes && !m_param->scaleFactor)
@@ -4427,7 +4428,7 @@ void Encoder::readAnalysisFile(x265_analysis_data* analysis, int curPoc, int sli
         tempModeBuf = X265_MALLOC(uint8_t, depthBytes);
         X265_FREAD(tempModeBuf, sizeof(uint8_t), depthBytes, m_analysisFileIn);
         modeBuf = tempModeBuf;
-        
+
         count = 0;
 
         for (uint32_t d = 0; d < depthBytes; d++)
@@ -4813,7 +4814,7 @@ void Encoder::printReconfigureParams()
         return;
     x265_param* oldParam = m_param;
     x265_param* newParam = m_latestParam;
-    
+
     x265_log(newParam, X265_LOG_DEBUG, "Reconfigured param options, input Frame: %d\n", m_pocLast + 1);
 
     char tmp[60];

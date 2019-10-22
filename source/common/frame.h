@@ -84,6 +84,7 @@ public:
     /* Data associated with x265_picture */
     PicYuv*                m_fencPic;
     int                    m_poc;
+    uint32_t               m_frameCount;         // match with input yuv
     int                    m_encodeOrder;
     int64_t                m_pts;                // user provided presentation time stamp
     int64_t                m_reorderedPts;

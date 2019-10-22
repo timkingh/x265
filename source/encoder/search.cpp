@@ -4059,10 +4059,11 @@ void Search::printImeMV(Mode& interMode, const CUGeom& cuGeom)
     {
         if (cuGeom.depth == 2)
         {
+            /* CU16x16 */
             uint32_t cu16_x = cu.m_cuPelX / 16;
             uint32_t cu16_y = cu.m_cuPelY / 16;
-            fprintf(m_fpImeMv, "frame=1, cu_x=%d, cu_y=%d, cu_size=16, mv_x=%d, mv_y=%d\n",
-                cu16_x, cu16_y, m_me.imeMv.x, m_me.imeMv.y);
+            fprintf(m_fpImeMv, "frame=%d, cu_x=%d, cu_y=%d, cu_size=16, mv_x=%d, mv_y=%d\n",
+                cu.m_frameCount, cu16_x, cu16_y, m_me.imeMv.x, m_me.imeMv.y);
         }
     }
 }

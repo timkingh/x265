@@ -570,7 +570,7 @@ bool CLIOptions::parse(int argc, char **argv)
 		svtParam->encoderColorFormat = (EB_COLOR_FORMAT)param->internalCsp;
     }
 #endif
-    
+
     /* Force CFR until we have support for VFR */
     info.timebaseNum = param->fpsDenom;
     info.timebaseDenom = param->fpsNum;
@@ -637,7 +637,7 @@ bool CLIOptions::parse(int argc, char **argv)
     if (!strcmp(str, ".y4m"))
     {
         x265_log(param, X265_LOG_ERROR, "VMAF supports YUV file format only.\n");
-        return true; 
+        return true;
     }
     if(param->internalCsp == X265_CSP_I420 || param->internalCsp == X265_CSP_I422 || param->internalCsp == X265_CSP_I444)
     {
@@ -728,7 +728,7 @@ bool CLIOptions::parseZoneFile()
             // Adding a dummy string to avoid file parsing error
             args[argCount++] = (char *)"x265";
             char* token = strtok(start, " ");
-            while (token) 
+            while (token)
             {
                 args[argCount++] = token;
                 token = strtok(NULL, " ");
@@ -781,7 +781,7 @@ static int get_argv_utf8(int *argc_ptr, char ***argv_ptr)
 }
 #endif
 
-/* Parse the RPU file and extract the RPU corresponding to the current picture 
+/* Parse the RPU file and extract the RPU corresponding to the current picture
  * and fill the rpu field of the input picture */
 static int rpuParser(x265_picture * pic, FILE * ptr)
 {
@@ -794,13 +794,13 @@ static int rpuParser(x265_picture * pic, FILE * ptr)
     {
         while (bytesRead++ < 4 && fread(&byteVal, sizeof(uint8_t), 1, ptr))
             code = (code << 8) | byteVal;
-      
+
         if (code != START_CODE)
         {
             x265_log(NULL, X265_LOG_ERROR, "Invalid Dolby Vision RPU startcode in POC %d\n", pic->pts);
             return 1;
         }
-    } 
+    }
 
     bytesRead = 0;
     while (fread(&byteVal, sizeof(uint8_t), 1, ptr))
@@ -813,11 +813,11 @@ static int rpuParser(x265_picture * pic, FILE * ptr)
             x265_log(NULL, X265_LOG_ERROR, "Invalid Dolby Vision RPU size in POC %d\n", pic->pts);
             return 1;
         }
-        
+
         if (code != START_CODE)
             pic->rpu.payload[pic->rpu.payloadSize++] = (code >> (3 * 8)) & 0xFF;
         else
-            return 0;       
+            return 0;
     }
 
     int ShiftBytes = START_CODE_BYTES - (bytesRead - pic->rpu.payloadSize);
@@ -958,7 +958,7 @@ int main(int argc, char **argv)
         if (pic_in->rpu.payload)
             bDolbyVisionRPU = true;
     }
-    
+
     if (cliopt.bDither)
     {
         errorBuf = X265_MALLOC(int16_t, param->sourceWidth + 1);
@@ -998,12 +998,13 @@ int main(int argc, char **argv)
             }
             /* Overwrite PTS */
             pic_in->pts = pic_in->poc;
+            pic_in->frameCount = inFrameCount - 1;
 
             // convert to field
             if (param->bField && param->interlaceMode)
             {
                 int height = pic_in->height >> 1;
-                
+
                 int static bCreated = 0;
                 if (bCreated == 0)
                 {
@@ -1020,7 +1021,7 @@ int main(int argc, char **argv)
                     size_t fieldFrameSize = (size_t)pic_in->framesize >> 1;
                     char* field1Buf = X265_MALLOC(char, fieldFrameSize);
                     char* field2Buf = X265_MALLOC(char, fieldFrameSize);
-  
+
                     int stride = picField1.stride[0] = picField2.stride[0] = pic_in->stride[0];
                     uint64_t framesize = stride * (height >> x265_cli_csps[pic_in->colorSpace].height[0]);
                     picField1.planes[0] = field1Buf;
@@ -1086,9 +1087,9 @@ int main(int argc, char **argv)
                 }
             }
         }
-                
+
         for (int inputNum = 0; inputNum < inputPicNum; inputNum++)
-        {  
+        {
             x265_picture *picInput = NULL;
             if (inputPicNum == 2)
                 picInput = pic_in ? (inputNum ? &picField2 : &picField1) : NULL;
@@ -1156,7 +1157,7 @@ int main(int argc, char **argv)
         if (!numEncoded)
             break;
     }
-  
+
     if (bDolbyVisionRPU)
     {
         if(fgetc(cliopt.dolbyVisionRpu) != EOF)
